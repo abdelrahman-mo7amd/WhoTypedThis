@@ -1,228 +1,454 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WhoTypedThis? - The Roast Game</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Bebas+Neue&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
-    <link href="style.css" rel="stylesheet"/>
-</head>
-<body>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Bebas+Neue&family=JetBrains+Mono:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link href="style/style.css" rel="stylesheet" />
+  </head>
+  <body>
     <div class="conn-status" id="conn-status">
-        <div class="conn-dot" id="conn-dot"></div>
-        <span id="conn-label">offline</span>
+      <div class="conn-dot" id="conn-dot"></div>
+      <span id="conn-label">offline</span>
     </div>
 
     <div id="toast"></div>
 
+    <!--      HOME                                                                                                      -->
     <section id="screen-home" class="screen active">
-        <div style="text-align: center; max-width: 560px; padding: 40px 20px;">
-            <div class="home-eyebrow">The Party Game That Exposes Everyone</div>
-            <div class="home-logo">WHO<br>TYPED</div>
-            <div class="home-logo-sub">THIS?</div>
-            <p class="home-desc">
-                Write anonymous one-liners about your friends. Then guess who wrote what.
-                100% chaos. 0% chill. Friendships may not survive. 🔥
-            </p>
-
-            <div class="home-badges">
-                <span class="badge badge-purple">🌍 Live Multiplayer</span>
-                <span class="badge badge-yellow">⚡ Real-Time Rooms</span>
-                <span class="badge badge-green">😂 Guaranteed Chaos</span>
-                <span class="badge badge-red">💀 No Filter Mode</span>
-            </div>
-            <div class="home-btns">
-                <button class="btn btn-primary" style="font-size: 17px; padding: 16px 40px;" onclick="showScreen('screen-create')">Create Room</button>
-                <button class="btn btn-secondary" style="font-size: 17px; padding: 16px 40px;" onclick="showScreen('screen-join')">Join Room</button>
-            </div>
-            <div style="margin-top: 40px;">
-                <div class="online-indicator" style="justify-content:center;">
-                    <div class="conn-dot online blink"></div>
-                    <span id="live-rooms-count">Checking live rooms...</span>
-                </div>
-            </div>
+      <div style="text-align: center; max-width: 560px; padding: 40px 20px">
+        <img src="logo.png" alt="Who Typed This?" class="home-logo-img" />
+        <p class="home-desc">
+          Write anonymous one-liners about your friends. Then guess who wrote
+          what. 100% chaos. 0% chill. Friendships may not survive.
+        </p>
+        <div class="home-badges">
+          <span class="badge badge-purple">Live Multiplayer</span>
+          <span class="badge badge-yellow">Real-Time Rooms</span>
+          <span class="badge badge-green">Guaranteed Chaos</span>
+          <span class="badge badge-red">No Filter Mode</span>
         </div>
+        <div class="home-btns">
+          <button
+            class="btn btn-primary"
+            style="font-size: 17px; padding: 16px 40px"
+            onclick="showScreen('screen-create')"
+          >
+            Create Room
+          </button>
+          <button
+            class="btn btn-secondary"
+            style="font-size: 17px; padding: 16px 40px"
+            onclick="showScreen('screen-join')"
+          >
+            Join Room
+          </button>
+        </div>
+        <div style="margin-top: 40px">
+          <div class="online-indicator" style="justify-content: center">
+            <div class="conn-dot online blink"></div>
+            <span id="live-rooms-count">Checking live rooms...</span>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <section class="screen" id="screen-create">
-        <div class="wrap">
-            <div class="nav">
-                <div class="nav-logo">Who<span>Typed</span>This?</div>
-                <button class="btn btn-ghost btn-sm" onclick="showScreen('screen-home')">← Back</button>
-            </div>
-            <h2 class="section-title">Create a Room 🛋️</h2>
-            <p class="section-sub">You're the host. Share the code with friends. The chaos is all on you.</p>
-            <div class="form-group">
-                <label for="" class="input-label">Your name</label>
-                <input class="input" id="create-room" placeholder="e.g. Friday Night Roast 🔥" maxlength="30"/>
-            </div>
-            <div class="form-group">
-                <label for="" class="input-label">Rounds (one prompt per player each round)</label>
-                <select class="input-label">
-                    <option value="1">1 round - Quick fire</option>
-                    <option value="2">2 rounds - Warp up</option>
-                    <option value="3" selected>3 rounds - Classic</option>
-                    <option value="5">5 rounds - Full chaos</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="" class="input-label">Guess timer</label>
-                <select class="input" id="create-timer" >
-                    <option value="15">15 seconds - Panic Mode</option>
-                    <option value="20">20 seconds</option>
-                    <option value="30">30 seconds</option>
-                    <option value="0">No timer - Relax</option>
-                </select>
-            </div>
-            <button class="btn btn-primary btn-fill" style="margin-top: 8px" onclick="createRoom()">Create Room →</button>
+    <!--      CREATE ROOM                                                                                          -->
+    <section id="screen-create" class="screen">
+      <div class="wrap">
+        <div class="nav">
+          <img src="logo.png" alt="Who Typed This?" class="nav-logo-img" />
+          <button
+            class="btn btn-ghost btn-sm"
+            onclick="showScreen('screen-home')"
+          >
+            ← Back
+          </button>
         </div>
+        <h2 class="section-title">Create a Room</h2>
+        <p class="section-sub">
+          You're the host. Share the code with friends. The chaos is all on you.
+        </p>
+        <div class="form-group">
+          <label class="input-label">Your name</label>
+          <input
+            class="input"
+            id="create-name"
+            placeholder="e.g. Ahmed, Sara, Bob..."
+            maxlength="20"
+          />
+        </div>
+        <div class="form-group">
+          <label class="input-label">Room name</label>
+          <input
+            class="input"
+            id="create-room"
+            placeholder="e.g. Friday Night Roast"
+            maxlength="30"
+          />
+        </div>
+        <div class="form-group">
+          <label class="input-label"
+            >Rounds (one prompt per player each round)</label
+          >
+          <select class="input" id="create-rounds">
+            <option value="1">1 round — Quick fire</option>
+            <option value="2">2 rounds — Warm up</option>
+            <option value="3" selected>3 rounds — Classic</option>
+            <option value="5">5 rounds — Full chaos</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="input-label">Guess timer</label>
+          <select class="input" id="create-timer">
+            <option value="15">15 seconds — Panic mode</option>
+            <option value="20" selected>20 seconds — Normal</option>
+            <option value="30">30 seconds — Chill</option>
+            <option value="0">No timer — Relax</option>
+          </select>
+        </div>
+        <button
+          class="btn btn-primary btn-full"
+          style="margin-top: 8px"
+          onclick="createRoom()"
+        >
+          Create Room →
+        </button>
+      </div>
     </section>
 
-    <section class="screen" id="screen-join">
-        <div class="wrap">
-            <div class="nav">
-                <div class="nav-logo">Who<span>Typed</span>This?</div>
-                <button class="btn btn-ghost btn-sm" onclick="showScreen('screen-home')">← Back</button>
-            </div>
-            <h2 class="section-title">Join a Room 🚪</h2>
-            <p class="section-sub">Ask the host for the 6-letter room code. Don't say you weren't warned.</p>
-            <div class="form-group">
-                <label for="" class="input-label">Your name</label>
-                <input class="input" id="join-name" placeholder="e.g. Sara, Khaled..." maxlength="20" />
-            </div>
-            <div class="form-group">
-                <label for="" class="input-label">Room code</label>
-                <input type="text" class="input" id="join-code" placeholder="ABC1234"
-                style="text-transform: uppercase;letter-spacing:0.3em;font-family:var(--mono);font-size:24px;text-align:center;" maxlength="6" oninput="this.value=this.value.toUpperCase()"/>
-            </div>
-            <button class="btn btn-secondary btn-full" style="margin-top: 8px;" onclick="joinRoom()">Join Room →</button>
+    <!--      JOIN ROOM                                                                                              -->
+    <section id="screen-join" class="screen">
+      <div class="wrap">
+        <div class="nav">
+          <img src="logo.png" alt="Who Typed This?" class="nav-logo-img" />
+          <button
+            class="btn btn-ghost btn-sm"
+            onclick="showScreen('screen-home')"
+          >
+            ← Back
+          </button>
         </div>
+        <h2 class="section-title">Join a Room</h2>
+        <p class="section-sub">
+          Ask the host for the 6-letter room code. Don't say you weren't warned.
+        </p>
+        <div class="form-group">
+          <label class="input-label">Your name</label>
+          <input
+            class="input"
+            id="join-name"
+            placeholder="e.g. Sara, Khaled..."
+            maxlength="20"
+          />
+        </div>
+        <div class="form-group">
+          <label class="input-label">Room code</label>
+          <input
+            class="input"
+            id="join-code"
+            placeholder="ABC123"
+            style="
+              text-transform: uppercase;
+              letter-spacing: 0.3em;
+              font-family: var(--font-mono);
+              font-size: 24px;
+              text-align: center;
+            "
+            maxlength="6"
+            oninput="this.value = this.value.toUpperCase()"
+          />
+        </div>
+        <button
+          class="btn btn-secondary btn-full"
+          style="margin-top: 8px"
+          onclick="joinRoom()"
+        >
+          Join Room →
+        </button>
+      </div>
     </section>
 
+    <!--      LOBBY                                                                                                      -->
     <section id="screen-lobby" class="screen">
-        <div class="wrap">
-            <div class="nav">
-                <div class="nav-logo">Who<span>Typed</span>This?</div>
-                <div class="nav-code" id="lobbyo-code-nav" onclick="copyCode()" title="Click to copy">
-                    <span id="lobby-code-text">------</span> 📋
-                </div>
-            </div>
-
-            <h2 class="section-title" id="lobby-title">Loading...</h2>
-            <p class="section-sub" id="lobby-sub">Waiting for players to join...</p>
-
-            <div class="room-code-box">
-                <div>
-                    <div class="room-code-label">Room Code - share this!</div>
-                    <div class="room-code-big" id="lobby-code-big">------</div>
-                </div>
-                <button class="btn btn-ghost btn-sm " onclick="copyCode()">Copy 📋</button>
-            </div>
-
-            <div class="player-list" id="lobby-players"></div>
-
-            <div class="lobby-host-zone" style="display:none;">
-                <button class="btn btn-green btn-full glow-pulse" id="start-btn" onclick="startGame()" disabled>Need 2+ players to start</button>
-                <p style="font-size:12px; color:var(--muted);text-align:center;margin-top: 10px" >👑 You're the host. Only you see this button.</p>
-            </div>
-
-            <div id="lobby-guest-zone" class="notice" style="display:none;margin-top:8px;">⏳ Waiting for the host to start the game...</div>
+      <div class="wrap">
+        <div class="nav">
+          <img src="logo.png" alt="Who Typed This?" class="nav-logo-img" />
+          <div
+            class="nav-code"
+            id="lobby-code-nav"
+            onclick="copyCode()"
+            title="Click to copy"
+          >
+            <span id="lobby-code-text">------</span> 📋
+          </div>
         </div>
+
+        <h2 class="section-title" id="lobby-title">Loading...</h2>
+        <p class="section-sub" id="lobby-sub">Waiting for players to join...</p>
+
+        <div class="room-code-box">
+          <div>
+            <div class="room-code-label">Room Code — share this!</div>
+            <div class="room-code-big" id="lobby-code-big">------</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="copyCode()">
+            Copy
+          </button>
+        </div>
+
+        <div class="player-list" id="lobby-players"></div>
+
+        <div id="lobby-host-zone" style="display: none">
+          <button
+            class="btn btn-green btn-full glow-pulse"
+            id="start-btn"
+            onclick="startGame()"
+            disabled
+          >
+            Need 2+ players to start
+          </button>
+          <p
+            style="
+              font-size: 12px;
+              color: var(--muted);
+              text-align: center;
+              margin-top: 10px;
+            "
+          >
+            You're the host. Only you see this button.
+          </p>
+        </div>
+
+        <div
+          id="lobby-guest-zone"
+          class="notice"
+          style="display: none; margin-top: 8px"
+        >
+          Waiting for the host to start the game...
+        </div>
+      </div>
     </section>
 
-    <section class="screen" id="screen-prompt">
-        <div class="wrap">
-            <div class="nav">
-                <div class="nav-logo">Who<span>Typed</span>This?</div>
-                <div class="nav-code">Who<span>Typed</span>This?</div>
-            </div>
-
-            <div class="prompt-target-card glow-pulse">
-                <div class="prompt-target-label">✍️ Write one line about...</div>
-                <div class="prompt-target-name" id="prompt-target-name">...</div>
-                <div class="prompt-hint">Be honest. Be weird. Be ruthlessly funny. No one knows it's you. 😈</div>
-            </div>
-
-            <div class="form-group">
-                <label for="" class="input-label">Your one-liner (10-100 chars)</label>
-                <textarea class="input" id="prompt-input" rows="3" placeholder="e.g. Would explain a meme for 20 minutes and still get it wrong..." maxlength="100" oninput="updateCharCount()" style="resize:none;line-height:1.5"></textarea>
-                <div class="char-bar"><div class="char-bar-fill" id="char-bar-fill" style="width:0%"></div></div>
-                <div class="char-count" id="char-count">0 / 100</div>
-            </div>
-
-            <div class="hint-pills" id="hint-pills">
-                <div class="hint-pill" onclick="useHint('Would 100% trip over nothing and blame the floor')">🏃 clumsy</div>
-                <div class="hint-pill" onclick="useHint('Has a different excuse everytime they\'re late')">⏰ always late</div>
-                <div class="hint-pill" onclick="useHint('Explains memes to people who already know the meme')">😅 meme explainer</div>
-                <div class="hint-pill" onclick="useHint('Their playlist is just 3 songs on repeat forever')">🎵 music taste</div>
-                <div class="hint-pill" onclick="useHint('Would survive a zombie apocalypse just by annoying them')">🧟 survivor</div>
-                <div class="hint-pill" onclick="useHint('Googles things instead of just knowing things')">🔍 googler</div>
-            </div>
-
-            <button class="btn btn-primary btn-full" style="margin-top: 20px;" id="submit-prompt-btn" onclick="submitPrompt()">Submit Anonymously 🙈</button>
-            <div class="divider"></div>
-            <div style="font-size: 11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:10px;">Who has submitted</div>
-            <div class="waiting-list" id="prompt-waiting-list"></div>
+    <!--      PROMPTING                                                                                              -->
+    <section id="screen-prompt" class="screen">
+      <div class="wrap">
+        <div class="nav">
+          <img src="logo.png" alt="Who Typed This?" class="nav-logo-img" />
+          <div class="nav-code" id="prompt-code-nav"></div>
         </div>
+
+        <div class="prompt-target-card glow-pulse">
+          <div class="prompt-target-label">Write one line about...</div>
+          <div class="prompt-target-name" id="prompt-target-name">...</div>
+          <div class="prompt-hint">
+            Be honest. Be weird. Be ruthlessly funny. No one knows it's you.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="input-label">Your one-liner (10–100 chars)</label>
+          <textarea
+            class="input"
+            id="prompt-input"
+            rows="3"
+            placeholder="e.g. Would explain a meme for 20 minutes and still get it wrong..."
+            maxlength="100"
+            oninput="updateCharCount()"
+            style="resize: none; line-height: 1.5"
+          ></textarea>
+          <div class="char-bar">
+            <div
+              class="char-bar-fill"
+              id="char-bar-fill"
+              style="width: 0%"
+            ></div>
+          </div>
+          <div class="char-count" id="char-count">0 / 100</div>
+        </div>
+
+        <div class="hint-pills" id="hint-pills">
+          <div
+            class="hint-pill"
+            onclick="
+              useHint('Would 100% trip over nothing and blame the floor')
+            "
+          >
+            clumsy
+          </div>
+          <div
+            class="hint-pill"
+            onclick="useHint('Has a different excuse every time they\'re late')"
+          >
+            always late
+          </div>
+          <div
+            class="hint-pill"
+            onclick="
+              useHint('Explains memes to people who already know the meme')
+            "
+          >
+            meme explainer
+          </div>
+          <div
+            class="hint-pill"
+            onclick="
+              useHint('Their playlist is just 3 songs on repeat forever')
+            "
+          >
+            music taste
+          </div>
+          <div
+            class="hint-pill"
+            onclick="
+              useHint('Would survive a zombie apocalypse just by annoying them')
+            "
+          >
+            survivor
+          </div>
+          <div
+            class="hint-pill"
+            onclick="useHint('Googles things instead of just knowing things')"
+          >
+            googler
+          </div>
+        </div>
+
+        <button
+          class="btn btn-primary btn-full"
+          style="margin-top: 20px"
+          id="submit-prompt-btn"
+          onclick="submitPrompt()"
+        >
+          Submit Anonymously
+        </button>
+
+        <div class="divider"></div>
+        <div
+          style="
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 10px;
+          "
+        >
+          Who has submitted
+        </div>
+        <div class="waiting-list" id="prompt-waiting-list"></div>
+      </div>
     </section>
 
-    <section class="screen" id="screen-guess">
-        <div class="wrap">
-            <div class="nav">
-                <div class="nav-logo">Who<span>Typed</span>This?</div>
-                <div class="nav-code" id="guess-code-nav"></div>
-            </div>
-
-            <div class="progress-row">
-                <div class="progress-label">Round <strong id='guess-round-num'>1</strong> of <strong id="guess-round-total">5</strong></div>
-                <div class="progress-label" id="timer-label-wrap">⏱ <strong id='guess-timer-num' style="font-family:var(--font-mono)">20</strong>s</div>
-            </div>
-
-            <div class="timer-wrap" id="timer-wrap">
-                <div class="timer-bar-bg"><div class="timer-bar-fill" id="timer-bar" style="width:100%"></div></div>
-            </div>
-
-            <div class="round-dots" id="round-dots"></div>
-
-            <div class="prompt-reveal-card">
-                <div class="prompt-about-label" id="guess-about-label">written about ...</div>
-                <div class="prompt-text" id="guess-prompt-text">...</div>
-            </div>
-
-            <p style="font-size:13px; color:var(--muted);margin-bottom:12px;text-align:center;">🤔 Who wrote this?</p>
-
-            <div class="guess-grid" id="guess-option"></div>
-
-            <div class="reveal-area"></div>
-
-            <div class="reaction-bar" id="reaction-bar" style="display:none;"></div>
-
-            <div class="next-btn-wrap" style="display:none;margin-top:8px">
-                <button class="btn btn-green btn-full" id="next-btn" onclick="nextRound()">Next Round →</button>
-            </div>
+    <!--      GUESSING                                                                                                  -->
+    <section id="screen-guess" class="screen">
+      <div class="wrap">
+        <div class="nav">
+          <img src="logo.png" alt="Who Typed This?" class="nav-logo-img" />
+          <div class="nav-code" id="guess-code-nav"></div>
         </div>
+
+        <div class="progress-row">
+          <div class="progress-label">
+            Round <strong id="guess-round-num">1</strong> of
+            <strong id="guess-round-total">5</strong>
+          </div>
+          <div class="progress-label" id="timer-label-wrap">
+            <strong id="guess-timer-num" style="font-family: var(--font-mono)"
+              >20</strong
+            >s
+          </div>
+        </div>
+
+        <div class="timer-wrap" id="timer-wrap">
+          <div class="timer-bar-bg">
+            <div
+              class="timer-bar-fill"
+              id="timer-bar"
+              style="width: 100%"
+            ></div>
+          </div>
+        </div>
+
+        <div class="round-dots" id="round-dots"></div>
+
+        <div class="prompt-reveal-card">
+          <div class="prompt-about-label" id="guess-about-label">
+            written about ...
+          </div>
+          <div class="prompt-text" id="guess-prompt-text">...</div>
+        </div>
+
+        <p
+          style="
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 12px;
+            text-align: center;
+          "
+        >
+          Who wrote this?
+        </p>
+
+        <div class="guess-grid" id="guess-options"></div>
+
+        <div id="reveal-area"></div>
+        <div class="reaction-bar" id="reaction-bar" style="display: none"></div>
+
+        <div id="next-btn-wrap" style="display: none; margin-top: 8px">
+          <button
+            class="btn btn-green btn-full"
+            id="next-btn"
+            onclick="nextRound()"
+          >
+            Next Round →
+          </button>
+        </div>
+      </div>
     </section>
 
-    <section class="screen" id="screen-final">
-        <div class="wrap">
-            <div class="nav">
-                <div class="nav-logo">Who<span>Typed</span>This?</div>
-            </div>
-
-            <div class="score-title" id="score-title">🏆 RESULTS</div>
-            <div class="score-subtitle" id="score-subtitle">The truth has been revealed. Friendships may vary.</div>
-
-            <div class="final-scoreboard" style="margin-bottom:28px"></div>
-
-            <div class="divider"></div>
-            <h3 style="font-size:18px; font-weight: 700;margin-bottom:28px">📜 Round Recap</h3>
-            <div id="recap-board" style="margin-bottom:28px"></div>
-
-            <button class="btn btn-primary btn-full" onclick="playAgain()">Play Again 🔄</button>
-            <button class="btn btn-ghost btn-full" style="margin-top:10px" onclick="goHome()">Back to home</button>
+    <!--      FINAL                                                                                                      -->
+    <section id="screen-final" class="screen">
+      <div class="wrap">
+        <div class="nav">
+          <img src="logo.png" alt="Who Typed This?" class="nav-logo-img" />
         </div>
+
+        <div class="score-title" id="score-title">RESULTS</div>
+        <div class="score-subtitle" id="score-subtitle">
+          The truth has been revealed. Friendships may vary.
+        </div>
+
+        <div id="final-scoreboard" style="margin-bottom: 28px"></div>
+
+        <div class="divider"></div>
+        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px">
+          Round Recap
+        </h3>
+        <div id="recap-board" style="margin-bottom: 28px"></div>
+
+        <button class="btn btn-primary btn-full" onclick="playAgain()">
+          Play Again
+        </button>
+        <button
+          class="btn btn-ghost btn-full"
+          style="margin-top: 10px"
+          onclick="goHome()"
+        >
+          Back to Home
+        </button>
+      </div>
     </section>
 
-    <script src="app.js"></script>
-</body>
+    <script src="js/audio.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/room.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+  </body>
 </html>
