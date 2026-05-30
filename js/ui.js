@@ -189,5 +189,73 @@ export const UI = {
     },
 
 
-    
+    renderNotifications(notifs){
+        const list = document.getElementById('notif-list');
+        if (!list) {
+            return;
+        }
+
+        if (!notifs.length) {
+            list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--trans);">No notifications yet</div>';
+            return;
+        }
+        const unread = notifs.filter(n => !n.read).length;
+        const badge = document.getElementById('notif-count');
+        if (badge) {
+            badge.textContent = unread;
+            badge.style.display = unread > 0 ? 'inline-block' : 'none';
+        }
+        list.innerHTML = notifs.map(n => `
+        <div class="notif-item ${n.read ? '' : 'unread'}" data-id="${n.id}">
+            <div>${notifIcon(n.type)} ${n.message || ''}</div>
+            <div class="notif-time">${timeAgo(n.createdAt?.toDate?.() || new Date())}</div>
+            ${n.type === 'friend_request' ? `
+            <div class="notif-action">
+                <button class="btn btn-green btn-sm" onclick="Friends.acceptRequest('${n.fromUid}')">Accept</button>
+                <button class="btn btn-ghost btn-sm"  onclick="Friends.rejectRequest('${n.fromUid}')">Ignore</button>
+            </div>
+            ` : ''}
+            ${n.type === 'room_invite' ? `
+            <div class="notif-action">
+                <button class="btn btn-primary btn-sm" onclick="Game.joinByCode('${n.roomCode}')">Join Room</button>
+            </div>
+            ` : ''}
+        </div>
+        `).join('');
+    },
+};
+
+function notifIcon (type) {
+    const map = {
+        friend_request: '👥',
+        friend_accepted: '🤝',
+        room_invite: '🎮',
+        achievement: '🏆',
+    };
+    return map[type] || '🔔';
 }
+
+function timeAgo(date) {
+    if (!date) {
+        return '';
+    }
+
+    const diff = Date.now() - date.getTime();
+    const min = Math.floor(diff/60000);
+    if (min < 1) {
+        return 'just now';
+    }
+
+    if (min < 60) {
+        return `${min}m ago`;
+    }
+
+    const hr = Math.floor(min/60);
+    if (hr<24) {
+        return `${hr}h ago`;
+    };
+
+    return `${Math.floor(hr/24)}d ago`;
+}
+
+window.UI = UI;
