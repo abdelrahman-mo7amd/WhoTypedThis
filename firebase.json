@@ -1,18 +1,16 @@
 {
-  "firestore" : {
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
-  },
   "hosting": {
     "public": ".",
     "ignore": [
       "firebase.json",
-      ".firebaserc",
-      ".gitignore",
-      "firestore.rules",
-      "firestore.indexes.json",
-      "README.md",
-      "node_modules"
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
     ]
   }
 }

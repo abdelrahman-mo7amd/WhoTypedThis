@@ -1,213 +1,287 @@
 import { db } from './firebase.js';
 import {
-    doc, collection, getDoc, setDoc, updateDoc, onSnapshot, query, where, orderBy, limit, getDocs, increment, arrayUnion, serverTimestamp, deleteDoc,
+  doc,
+  collection,
+  getDoc,
+  setDoc,
+  updateDoc,
+  onSnapshot,
+  query,
+  where,
+  orderBy,
+  limit,
+  getDocs,
+  increment,
+  arrayUnion,
+  serverTimestamp,
+  deleteDoc,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 export const DB = {
 
-    // Rooms 
-    async createRoom(code, data) {
-        const ref = doc(db, 'rooms', code);
-        await setDoc(ref, {...data, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
-        return true;
-    },
+  async createRoom(code, data) {
+    const ref = doc(db, 'rooms', code);
+    data.createdAt = serverTimestamp();
+    data.updatedAt = serverTimestamp();
+    await setDoc(ref, data);
+    return true;
+  },
 
-    async getRoom(code) {
-        const snap = await getDoc(doc(db, 'rooms', code));
-        return snap.exists() ? snap.data() : null;
-    },
+  async getRoom(code) {
+    const snap = await getDoc(doc(db, 'rooms', code));
+    if (snap.exists()) {
+      return snap.data();
+    }
+    return null;
+  },
 
-    async updateRoom(code, data) {
-        await updateDoc(doc(db, 'rooms', code), {...data, updatedAt: serverTimestamp() });
-    },
+  async updateRoom(code, data) {
+    data.updatedAt = serverTimestamp();
+    await updateDoc(doc(db, 'rooms', code), data);
+  },
 
-    async patchRoom(code, patchFn) {
-        const room = await DB.getRoom(code);
-        if (!room) return false;
-        patchFn(room);
-        await DB.updateRoom(code, room);
-        return true;
-    },
+  async patchRoom(code, patchFn) {
+    const room = await DB.getRoom(code);
+    if (!room) {
+      return false;
+    }
+    patchFn(room);
+    await DB.updateRoom(code, room);
+    return true;
+  },
 
-    listenRoom(code, callback) {
-        return onSnapshot(doc(db, 'rooms', code), snap => {
-            if (snap.exists()) callback(snap.data());
-        });
-    },
+  listenRoom(code, callback) {
+    return onSnapshot(doc(db, 'rooms', code), snap => {
+      if (snap.exists()) {
+        callback(snap.data());
+      }
+    });
+  },
 
-    async deleteRoom(code) {
-        await deleteDoc(doc(db, 'rooms', code));
-    },
+  async deleteRoom(code) {
+    await deleteDoc(doc(db, 'rooms', code));
+  },
 
-    // Users 
-    async getUser(uid) {
-        const snap = await getDoc(doc(db, 'users', uid));
-        return snap.exists() ? snap.data() : null;
-    },
-    
-    async updateUser(uid, data) {
-        await updateDoc(doc(db,'users',uid), data);
-    },
+  async getUser(uid) {
+    const snap = await getDoc(doc(db, 'users', uid));
+    if (snap.exists()) {
+      return snap.data();
+    }
+    return null;
+  },
 
-    async incrementUserStats(uid, {points = 0, correct = 0, games = 0}) {
-        if (!uid || uid.startsWith('guest_')) return;
-        const weekKey = weekStart();
-        await updateDoc(doc(db, 'users', uid), {
-            totalPoints: increment(points),
-            correctGuesses: increment(correct),
-            gamesPlayed: increment(games),
-            weeklyPoints: increment(points),
-            weekStart: weekKey,
-            lastPlayed: serverTimestamp(),
-        });
-    },
+  async updateUser(uid, data) {
+    await updateDoc(doc(db, 'users', uid), data);
+  },
 
-    async saveGameResult(uid, gameData) {
-        if (!uid || uid.startWith('guest_')) return;
-        const ref = doc(collecton(db, 'users', uid, 'games'));
-        await setDoc(ref, {...gameData , playedAt: serverTimestamp()});
-    },
+  async incrementUserStats(uid, opts) {
+    const points = opts.points || 0;
+    const correct = opts.correct || 0;
+    const games = opts.games || 0;
 
-    async getRecentGames( uid, count = 5 ){ 
-        if (!uid || uid.startWith('guest_')) return [];
-        const q = query(
-            collection(db, 'users', uid, 'games'),
-            orderBy('playedAt', 'desc'),
-            limit(count)
-        );
-        const snap = await getDocs(q);
-        return snap.docs.map(d=>d.data());
-    },
+    if (!uid || uid.startsWith('guest_')) {
+      return;
+    }
 
-    // Leaderboard
-    async getLeaderboard(type = 'alltime', count = 20) {
-        const field = type === 'weekly' ? 'weeklyPoints' : type === 'games' ? 'gamesPlayed' : 'totalPoints';
-        const q = query(collection(db, 'users'), where(field, '>', 0), orderBy(field, 'desc'), limit(count));
-        const snap = await getDocs(q);
-        return snap.docs.map(d => d.data());
-    },
+    const weekKey = weekStart();
+    await updateDoc(doc(db, 'users', uid), {
+      totalPoints: increment(points),
+      correctGuesses: increment(correct),
+      gamesPlayed: increment(games),
+      weeklyPoints: increment(points),
+      weekStart: weekKey,
+      lastPlayed: serverTimestamp(),
+    });
+  },
 
-    async sendFriendRequest(fromUid, toUid) {
-        const ref = doc(db, 'friendRequests', `${fromUid}_${toUid}`);
-        await setDoc(ref, {
-            from: fromUid, to: toUid,
-            status: 'pending',
-            createdAt: serverTimestamp(),
-        });
-    },
+  async saveGameResult(uid, gameData) {
+    if (!uid || uid.startsWith('guest_')) {
+      return;
+    }
+    const ref = doc(collection(db, 'users', uid, 'games'));
+    gameData.playedAt = serverTimestamp();
+    await setDoc(ref, gameData);
+  },
 
-    async acceptFriendRequest(fromUid, toUid) {
-        await updateDoc(doc(db, 'users', toUid), {friends: arrayUnion(fromUid) });
-        await updateDoc(doc(db, 'users', fromUid), {friends: arrayUnion(toUid)});
-        await updateDoc(doc(db, 'friendRequests', `${fromUid}_${toUid}`), {status: 'accepted'});
-        await DB.addNotification(fromUid, {
-            type: 'friend_accepted',
-            message: 'accepted your friend request! 🤝',
-            fromUid: toUid,
-        });
-    },
-    async rejectFriendRequest(fromUid, toUid) {
-        await deleteDoc(doc(db, 'friendRequests', `${fromUid}_${toUid}`));
-    },
+  async getRecentGames(uid, count) {
+    if (!count) {
+      count = 5;
+    }
+    if (!uid || uid.startsWith('guest_')) {
+      return [];
+    }
+    const q = query(
+      collection(db, 'users', uid, 'games'),
+      orderBy('playedAt', 'desc'),
+      limit(count)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(d => d.data());
+  },
 
-    async removeFriend(uid1, uid2){
-        const u1 = await DB.getUser(uid1);
-        const u2 = await DB.getUser(uid2);
-        const f1 = (u1?.friends || []).filter(id => id !== uid2);
-        const f2 = (u2?.friends || []).filter(id => id !== uid1);
-        await updateDoc(doc(db, 'users', uid1), {friends: f1});
-        await updateDoc(doc(db, 'users', uid2), {friends: f2});
-    },
+  async getLeaderboard(type, count) {
+    if (!type) {
+      type = 'alltime';
+    }
+    if (!count) {
+      count = 20;
+    }
 
-    async getPendingRequests(uid) {
-        const q = query(
-            collection(db, 'friendRequests'), 
-            where('to', '==', uid),
-            where('status', '==', 'pending')
-        );
+    let field = 'totalPoints';
+    if (type === 'weekly') {
+      field = 'weeklyPoints';
+    } else if (type === 'games') {
+      field = 'gamesPlayed';
+    }
 
-        const snap = await getDocs(q);
+    const q = query(
+      collection(db, 'users'),
+      where(field, '>', 0),
+      orderBy(field, 'desc'),
+      limit(count)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(d => d.data());
+  },
 
-        return snap.docs.map(d => d.data());
-    },
+  async sendFriendRequest(fromUid, toUid) {
+    const ref = doc(db, 'friendRequests', fromUid + '_' + toUid);
+    await setDoc(ref, {
+      from: fromUid,
+      to: toUid,
+      status: 'pending',
+      createdAt: serverTimestamp(),
+    });
+  },
 
-    async getSentRequests(uid) {
-        const q = query(
-            collection(db, 'friendRequests'),
-            where('from', '==', uid),
-            where('status', '==', 'pending')
-        );
+  async acceptFriendRequest(fromUid, toUid) {
+    await updateDoc(doc(db, 'users', toUid), { friends: arrayUnion(fromUid) });
+    await updateDoc(doc(db, 'users', fromUid), { friends: arrayUnion(toUid) });
+    await updateDoc(doc(db, 'friendRequests', fromUid + '_' + toUid), { status: 'accepted' });
+    await DB.addNotification(fromUid, {
+      type: 'friend_accepted',
+      message: 'accepted your friend request',
+      fromUid: toUid,
+    });
+  },
 
-        const snap = await getDocs(q);
-        return snap.docs.map(d=>d.data());
-    },
+  async rejectFriendRequest(fromUid, toUid) {
+    await deleteDoc(doc(db, 'friendRequests', fromUid + '_' + toUid));
+  },
 
-    async searchUsers(term) {
-        const q = query(
-            collection(db, 'users'),
-            where('displayName', '>=', term),
-            where('displayName', '<=', term + '\uf8ff'),
-            limit(10)
-        );
+  async removeFriend(uid1, uid2) {
+    const u1 = await DB.getUser(uid1);
+    const u2 = await DB.getUser(uid2);
+    const f1 = (u1?.friends || []).filter(id => id !== uid2);
+    const f2 = (u2?.friends || []).filter(id => id !== uid1);
+    await updateDoc(doc(db, 'users', uid1), { friends: f1 });
+    await updateDoc(doc(db, 'users', uid2), { friends: f2 });
+  },
 
-        const snap = await getDocs(q);
-        return snap.docs.map(d => d.data());
-    },
+  async getPendingRequests(uid) {
+    const q = query(
+      collection(db, 'friendRequests'),
+      where('to', '==', uid),
+      where('status', '==', 'pending')
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(d => d.data());
+  },
 
-    async addNotification(uid, data){
-        if (!uid || uid.startsWith('guest_')) return;
-        const ref = doc(collection(db, 'users', uid, 'notifications'));
-        await setDoc(ref, {...data, read: false, createdAt: serverTimestamp() })
-    }, 
+  async getSentRequests(uid) {
+    const q = query(
+      collection(db, 'friendRequests'),
+      where('from', '==', uid),
+      where('status', '==', 'pending')
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(d => d.data());
+  },
 
-    async getNotifications(uid, count=20) {
-        if (!uid || uid.startsWith('guest_')) return [];
-        const q = query(
-            collection(db, 'users', uid, 'notifications'),
-            orderBy('createdAt', 'desc'),
-            limit(count)
-        );
+  async searchUsers(term) {
+    const q = query(
+      collection(db, 'users'),
+      where('displayName', '>=', term),
+      where('displayName', '<=', term + '\uf8ff'),
+      limit(10)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(d => d.data());
+  },
 
-        const snap = await getDocs(q);
-        return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    },
+  async addNotification(uid, data) {
+    if (!uid || uid.startsWith('guest_')) {
+      return;
+    }
+    const ref = doc(collection(db, 'users', uid, 'notifications'));
+    data.read = false;
+    data.createdAt = serverTimestamp();
+    await setDoc(ref, data);
+  },
 
-    async markNotificationRead(uid, notifId) {
-        await updateDoc(doc(db, 'users', uid, 'notifications', notifId), { read: true });
-    },
+  async getNotifications(uid, count) {
+    if (!count) {
+      count = 20;
+    }
+    if (!uid || uid.startsWith('guest_')) {
+      return [];
+    }
+    const q = query(
+      collection(db, 'users', uid, 'notifications'),
+      orderBy('createdAt', 'desc'),
+      limit(count)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(d => {
+      const data = d.data();
+      data.id = d.id;
+      return data;
+    });
+  },
 
-    listenNotifications(uid, callback) {
-        if (!uid || uid.startsWith('guest_')) return () => {};
-        const q = query(
-            collection(db, 'users', uid, 'notifications'),
-            orderBy('createdAt', 'desc'),
-            limit(20)
-        );
-        return onSnapshot(q, snap => {
-            const notifs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            callback(notifs);
-        });
-    },
+  async markNotificationRead(uid, notifId) {
+    await updateDoc(doc(db, 'users', uid, 'notifications', notifId), { read: true });
+  },
 
-    async getLiveRoomCount() {
-        const cutoff = new Date(Date.now() - 3 * 60 * 60 * 1000);
-        const  q = query(
-            collection(db, 'rooms'),
-            where('phase', 'in', ['lobby', 'prompting', 'guessing']),
-            limit(100)
-        );
-        try {
-            const snap = await getDocs(q);
-            return snap.size;
-        } catch { return 0; }
-    }, 
+  listenNotifications(uid, callback) {
+    if (!uid || uid.startsWith('guest_')) {
+      return () => {};
+    }
+    const q = query(
+      collection(db, 'users', uid, 'notifications'),
+      orderBy('createdAt', 'desc'),
+      limit(20)
+    );
+    return onSnapshot(q, snap => {
+      const notifs = snap.docs.map(d => {
+        const data = d.data();
+        data.id = d.id;
+        return data;
+      });
+      callback(notifs);
+    });
+  },
+
+  async getLiveRoomCount() {
+    const q = query(
+      collection(db, 'rooms'),
+      where('phase', 'in', ['lobby', 'prompting', 'guessing']),
+      limit(100)
+    );
+    try {
+      const snap = await getDocs(q);
+      return snap.size;
+    } catch (e) {
+      return 0;
+    }
+  },
 };
 
 function weekStart() {
-    const d = new Date();
-    d.setHours(0,0,0,0);
-    d.setDate(d.getDate() - d.getDay());
-    return d.toISOString();
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - d.getDay());
+  return d.toISOString();
 }
 
 window.DB = DB;
