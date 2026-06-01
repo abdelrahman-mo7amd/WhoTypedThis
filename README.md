@@ -1,4 +1,12 @@
+<p align="center">
+    <img src='./assets/banner.png' alt='WhoTypedThis Banner' width="100%">
+</p>
+
 # 🎭 Who Typed This? v2.0 is alive and making friendships questionable
+<p align="center">
+  <img src="https://img.shields.io/badge/version-v1.0-ffb703?style=for-the-badge">
+  <img src="https://img.shields.io/badge/multiplayer-YES-orange?style=for-the-badge">
+</p>
 
 ### A real-time multiplayer typing game where friends compete, lie, and slowly lose trust in each other.
 
@@ -227,11 +235,17 @@ If you want to contribute:
 
 ## License
 
-MIT License.
-Meaning: do what you want, just don’t blame me.
+MIT License
 
----
+Meaning:
+you can use it,
+modify it,
+and probably create even more chaos.
 
-## Author
 
-Built with caffeine, confusion, and the belief that friends can survive one more round.
+
+
+<p align="center">
+  <b>WhoTypedThis?</b><br>
+  Guess. Laugh. Regret.
+</p>
