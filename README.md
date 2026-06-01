@@ -4,7 +4,7 @@
 
 # 🎭 Who Typed This? v2.0 is alive and making friendships questionable
 <p align="center">
-  <img src="https://img.shields.io/badge/version-v1.0-ffb703?style=for-the-badge">
+  <img src="https://img.shields.io/badge/version-v2.0-ffb703?style=for-the-badge">
   <img src="https://img.shields.io/badge/multiplayer-YES-orange?style=for-the-badge">
 </p>
 
