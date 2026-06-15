@@ -1,16 +1,3 @@
-<p align="center">
-    <img src='./assets/banner.png' alt='WhoTypedThis Banner' width="100%">
-</p>
-<<<<<<< HEAD
-
-# 🎭 Who Typed This? v2.0 is alive and making friendships questionable
-<p align="center">
-  <img src="https://img.shields.io/badge/version-v2.0-ffb703?style=for-the-badge">
-  <img src="https://img.shields.io/badge/multiplayer-YES-orange?style=for-the-badge">
-</p>
-=======
->>>>>>> 832523f (Updating the README.md adding some important info)
-
 # 🎭 Who Typed This? v2.0 is alive and making friendships questionable
 <p align="center">
   <img src="https://img.shields.io/badge/version-v2.0-ffb703?style=for-the-badge">
@@ -173,8 +160,4 @@ and probably create even more chaos.
 <p align="center">
   <b>WhoTypedThis?</b><br>
   Guess. Laugh. Regret.
-<<<<<<< HEAD
 </p>
-=======
-</p>
->>>>>>> 832523f (Updating the README.md adding some important info)
