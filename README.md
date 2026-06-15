@@ -1,3 +1,8 @@
+
+<p align="center">
+    <img src='./assets/banner.png' alt='WhoTypedThis Banner' width="100%">
+</p>
+
 # 🎭 Who Typed This? v2.0 is alive and making friendships questionable
 <p align="center">
   <img src="https://img.shields.io/badge/version-v2.0-ffb703?style=for-the-badge">
