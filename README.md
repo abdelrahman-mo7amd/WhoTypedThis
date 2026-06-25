@@ -14,6 +14,12 @@ Live demo: [https://whotypedthis-f9704.web.app/](https://whotypedthis-f9704.web.
 
 ---
 
+## AI declaration 
+
+
+the image and designs, the logo, the colors, and the background are made using AI, also making more than one room idea was made by AI, but i also contributed with my knowledge in it, AI just helped me, any errors are fixed using AI.
+---
+
 ## How it works
 
 1. everyone types a message to a friend in the room anonymously
