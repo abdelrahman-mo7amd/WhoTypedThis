@@ -14,161 +14,104 @@ Live demo: [https://whotypedthis-f9704.web.app/](https://whotypedthis-f9704.web.
 
 ---
 
-## AI declaration 
+## AI declaration
 
+ok so i want be honest here,
 
-the image and designs, the logo, the colors, and the background are made using AI, also making more than one room idea was made by AI, but i also contributed with my knowledge in it, AI just helped me, any errors are fixed using AI.
+the logo and most of the desgin and images and colors was made with AI helping me. also some room ideas and layouts was generated with AI too because i was trying many differnt ideas and seeing what looks better.
+
+but i didnt just copy every thing. i changed alot of stuff myself and used my own knowledge and coding. AI was helping and giving suggesstions but the final thing is edited by me.
+
+also when there was bugs or errors sometime AI helped finding them faster. not every code or desgin here was made by AI, it was more like a tool helping during development.
+
 ---
 
 ## How it works
 
-1. everyone types a message to a friend in the room anonymously
-2. everyone tries to guess who wrote each message
-3. accusations begin immediately, usually wrong
-4. repeat until someone logs off “for no reason”
+1. every one type a messege anonmously in the room
+2. then peoples try guess who writed it
+3. arguments starts almost instantly
+4. nobody trust nobody anymore
+5. game continue until someone rage quit or leave for no reason
 
 ---
 
 ## Gameplay example
-Write message about Ahmed: 
-> “He is still using Internet Explorer.”
 
-What happens next:
+Write messege about Ahmed:
 
-* Ahmed denies everything too aggressively
-* Sarah takes it personally
-* Someone votes based on vibes
-* One player suddenly becomes silent for the rest of the match
+> "he still using internet explorer lol"
 
-This is normal behavior.
+what happen next:
+
+* Ahmed start defending him self way too much
+* Sarah somehow get offended
+* someone vote random because "i feel its him"
+* one player become complete silent and never talks again
+
+this is normal. and happen alot.
 
 ---
 
 ## Features
+
 ### Multiplayer rooms
 
-Create a room, invite friends, or accidentally invite enemies.
-Both lead to the same outcome.
+make room and invite your friends.
 
-### Firebase-powered reality
+or invite peoples you dont like.
 
-* Authentication via Firebase Auth
-* Real-time syncing with Firestore
-* Live updates faster than your friendships recover
+both usually ends same result honestly.
+
+### Firebase powered stuff
+
+* firebase auth for login and signup
+* firestore for realtime updates
+* things update very fast most times
+* friendship update much slower
 
 ### Leaderboard system
 
-Earn points by:
+you get points by:
 
-* Guessing correctly (rare skill)
-* Convincing everyone you didn’t type that (art form)
-* Acting suspicious for no reason (natural talent)
-
----
-
-## Screenshots
-
-| Signin/Signup/Guest Page  | Create / Join Room          |
-| ----------------------- | --------------------------- |
-| ![](assets/signin.png) | ![](assets/create.png) |
-
-|  Profile                 | Room Lobby             |
-| --------------------------- | -------------------------- |
-| ![](assets/profile.png) | ![](assets/room.png) |
-
-| Write Prompt                 | Voting Phase                 |
-| ---------------------------- | ---------------------------- |
-| ![](assets/writing.png) | ![](assets/voting.png) |
-
-| Scores and Results           |  Home                 |
-| -------------------------- | ------------------------------- |
-| ![](assets/scores.png) | ![](assets/home.png) |
+* guessing right
+* making peoples think it wasnt you
+* acting sus for absolutly no reason
+* getting lucky sometimes
 
 ---
 
 ## Tech stack
 
-* Frontend: Vanilla JS, HTML, CSS
-* Backend: Firebase
+* Frontend: vanilla js html and css
+* Backend: firebase
 
-  * firestore (real-time brain damage sync)
-  * authentication (who even are you?)
+  * firestore (save all the chaos)
+  * auth (proves your a real human maybe)
   * hosting
-
----
-
-## Project structure
-
-```
-.
-├── assets/
-├── css/
-├── js/
-├── index.html
-├── firebase.json
-├── firestore.rules
-└── README.md
-```
 
 ---
 
 ## How to play
 
-1. open the game
-2. sign in, sign up, or enter as guest
-3. create or join a room
-4. wait for players
-5. start round
-6. everyone submits something suspicious
-7. everyone votes emotionally
-8. score is calculated
+1. open game
+2. sign in or sign up or guest mode
+3. join room or make one
+4. wait other players
+5. start game
+6. write something
+7. vote based on almost nothing
+8. see who wins
 
 ---
 
 ## Installation
-You can play through: https://whotypedthis-f9704.web.app/
 
-Or colne the repo:
+you can play it here:
+https://whotypedthis-f9704.web.app/
+
+or clone repo if you want
 
 ```bash
 git clone https://github.com/abdelrahman-mo7amd/WhoTypedThis.git
 cd WhoTypedThis
-```
-
----
-
-## Run locally
-
-```bash
-python3 -m http.server 8080
-```
-
----
-
-## Contributing
-
-If you want to contribute:
-
-1. Fork it
-2. Break something
-3. Fix it
-4. Submit a PR explaining why it broke in the first place
-
----
-
-## License
-
-MIT License
-
-Meaning:
-you can use it,
-modify it,
-and probably create even more chaos.
-
-
-
-
-<p align="center">
-  <b>WhoTypedThis?</b><br>
-  Guess. Laugh. Regret.
-</p>
