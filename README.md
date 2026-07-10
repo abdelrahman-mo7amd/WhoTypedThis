@@ -10,7 +10,7 @@
 
 ### multiplayer typing game where friends compete, lie, and slowly lose trust in each other.
 
-Live demo: [https://whotypedthis-f9704.web.app/](https://whotypedthis-f9704.web.app/)
+Live demo: [https://whotypedthis1.vercel.app/](https://whotypedthis1.vercel.app/)
 
 ---
 
