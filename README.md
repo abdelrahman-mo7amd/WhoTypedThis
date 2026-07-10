@@ -15,6 +15,10 @@ Live demo: [https://whotypedthis-f9704.web.app/](https://whotypedthis-f9704.web.
 ---
 
 ## AI declaration
+UPDATE [10/07/2026]: As today i have redesigned all the AI visuals, using Wacom Graphic Tablet drawing, and also fonts from Canva, the banner is made using Canva.
+Now i can say i haven't used any AI in my project, and also my commit history is well organized...
+
+----------------------------------
 
 ok so i want be honest here,
 
