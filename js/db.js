@@ -1,24 +1,11 @@
 import { db } from './firebase.js';
 import {
-  doc,
-  collection,
-  getDoc,
-  setDoc,
-  updateDoc,
-  onSnapshot,
-  query,
-  where,
-  orderBy,
-  limit,
-  getDocs,
-  increment,
-  arrayUnion,
-  serverTimestamp,
-  deleteDoc,
+  doc, collection, getDoc, setDoc, updateDoc, onSnapshot,
+  query, where, orderBy, limit, getDocs, increment,
+  arrayUnion, arrayRemove, serverTimestamp, deleteDoc,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 export const DB = {
-
   async createRoom(code, data) {
     const ref = doc(db, 'rooms', code);
     data.createdAt = serverTimestamp();
@@ -29,10 +16,7 @@ export const DB = {
 
   async getRoom(code) {
     const snap = await getDoc(doc(db, 'rooms', code));
-    if (snap.exists()) {
-      return snap.data();
-    }
-    return null;
+    return snap.exists() ? snap.data() : null;
   },
 
   async updateRoom(code, data) {
@@ -40,21 +24,9 @@ export const DB = {
     await updateDoc(doc(db, 'rooms', code), data);
   },
 
-  async patchRoom(code, patchFn) {
-    const room = await DB.getRoom(code);
-    if (!room) {
-      return false;
-    }
-    patchFn(room);
-    await DB.updateRoom(code, room);
-    return true;
-  },
-
   listenRoom(code, callback) {
     return onSnapshot(doc(db, 'rooms', code), snap => {
-      if (snap.exists()) {
-        callback(snap.data());
-      }
+      if (snap.exists()) callback(snap.data());
     });
   },
 
@@ -64,10 +36,7 @@ export const DB = {
 
   async getUser(uid) {
     const snap = await getDoc(doc(db, 'users', uid));
-    if (snap.exists()) {
-      return snap.data();
-    }
-    return null;
+    return snap.exists() ? snap.data() : null;
   },
 
   async updateUser(uid, data) {
@@ -75,168 +44,123 @@ export const DB = {
   },
 
   async incrementUserStats(uid, opts) {
-    const points = opts.points || 0;
-    const correct = opts.correct || 0;
-    const games = opts.games || 0;
-
-    if (!uid || uid.startsWith('guest_')) {
-      return;
-    }
-
+    if (!uid || uid.startsWith('guest_')) return;
     const weekKey = weekStart();
     await updateDoc(doc(db, 'users', uid), {
-      totalPoints: increment(points),
-      correctGuesses: increment(correct),
-      gamesPlayed: increment(games),
-      weeklyPoints: increment(points),
+      totalPoints: increment(opts.points || 0),
+      correctGuesses: increment(opts.correct || 0),
+      gamesPlayed: increment(opts.games || 0),
+      weeklyPoints: increment(opts.points || 0),
       weekStart: weekKey,
       lastPlayed: serverTimestamp(),
     });
   },
 
   async saveGameResult(uid, gameData) {
-    if (!uid || uid.startsWith('guest_')) {
-      return;
-    }
+    if (!uid || uid.startsWith('guest_')) return;
     const ref = doc(collection(db, 'users', uid, 'games'));
     gameData.playedAt = serverTimestamp();
     await setDoc(ref, gameData);
   },
 
-  async getRecentGames(uid, count) {
-    if (!count) {
-      count = 5;
-    }
-    if (!uid || uid.startsWith('guest_')) {
-      return [];
-    }
-    const q = query(
-      collection(db, 'users', uid, 'games'),
-      orderBy('playedAt', 'desc'),
-      limit(count)
-    );
+  async getRecentGames(uid, count = 5) {
+    if (!uid || uid.startsWith('guest_')) return [];
+    const q = query(collection(db, 'users', uid, 'games'), orderBy('playedAt', 'desc'), limit(count));
     const snap = await getDocs(q);
     return snap.docs.map(d => d.data());
   },
 
-  async getLeaderboard(type, count) {
-    if (!type) {
-      type = 'alltime';
-    }
-    if (!count) {
-      count = 20;
-    }
-
-    let field = 'totalPoints';
-    if (type === 'weekly') {
-      field = 'weeklyPoints';
-    } else if (type === 'games') {
-      field = 'gamesPlayed';
-    }
-
-    const q = query(
-      collection(db, 'users'),
-      where(field, '>', 0),
-      orderBy(field, 'desc'),
-      limit(count)
-    );
+  async getLeaderboard(type = 'alltime', count = 20) {
+    const field = type === 'weekly' ? 'weeklyPoints' : type === 'games' ? 'gamesPlayed' : 'totalPoints';
+    const q = query(collection(db, 'users'), where(field, '>', 0), orderBy(field, 'desc'), limit(count));
     const snap = await getDocs(q);
     return snap.docs.map(d => d.data());
   },
 
   async sendFriendRequest(fromUid, toUid) {
     const ref = doc(db, 'friendRequests', fromUid + '_' + toUid);
-    await setDoc(ref, {
-      from: fromUid,
-      to: toUid,
-      status: 'pending',
-      createdAt: serverTimestamp(),
-    });
+    await setDoc(ref, { from: fromUid, to: toUid, status: 'pending', createdAt: serverTimestamp() });
   },
 
   async acceptFriendRequest(fromUid, toUid) {
-    await updateDoc(doc(db, 'users', toUid), { friends: arrayUnion(fromUid) });
-    await updateDoc(doc(db, 'users', fromUid), { friends: arrayUnion(toUid) });
-    await updateDoc(doc(db, 'friendRequests', fromUid + '_' + toUid), { status: 'accepted' });
+    console.log('[DB.accept] fromUid:', fromUid, 'toUid:', toUid);
+
+    const addFriend = async (uid, friendUid) => {
+      console.log('[DB.accept] adding friend', friendUid, 'to user', uid);
+      try {
+        await updateDoc(doc(db, 'users', uid), { friends: arrayUnion(friendUid) });
+        console.log('[DB.accept] updateDoc succeeded for', uid);
+      } catch (e1) {
+        console.warn('[DB.accept] updateDoc failed, trying setDoc:', e1?.code, e1?.message);
+        await setDoc(doc(db, 'users', uid), { friends: [friendUid] }, { merge: true });
+        console.log('[DB.accept] setDoc succeeded for', uid);
+      }
+    };
+
+    await addFriend(toUid, fromUid);
+
+    console.log('[DB.accept] sending notification to', fromUid);
     await DB.addNotification(fromUid, {
       type: 'friend_accepted',
       message: 'accepted your friend request',
       fromUid: toUid,
+      addFriend: toUid,
     });
+    console.log('[DB.accept] notification sent');
+
+    const tryDelete = async (key) => {
+      try {
+        await deleteDoc(doc(db, 'friendRequests', key));
+        console.log('[DB.accept] deleted request doc:', key);
+      } catch (e) {
+        console.log('[DB.accept] could not delete key:', key, e?.code);
+      }
+    };
+    await tryDelete(fromUid + '_' + toUid);
+    await tryDelete(toUid + '_' + fromUid);
+    console.log('[DB.accept] done');
   },
 
   async rejectFriendRequest(fromUid, toUid) {
     await deleteDoc(doc(db, 'friendRequests', fromUid + '_' + toUid));
   },
 
-  async removeFriend(uid1, uid2) {
-    const u1 = await DB.getUser(uid1);
-    const u2 = await DB.getUser(uid2);
-    const f1 = (u1?.friends || []).filter(id => id !== uid2);
-    const f2 = (u2?.friends || []).filter(id => id !== uid1);
-    await updateDoc(doc(db, 'users', uid1), { friends: f1 });
-    await updateDoc(doc(db, 'users', uid2), { friends: f2 });
+  async removeFriend(currentUid, friendUid) {
+    // Only update the current user's own doc (Firestore rules block writing to other users)
+    await updateDoc(doc(db, 'users', currentUid), { friends: arrayRemove(friendUid) });
   },
 
   async getPendingRequests(uid) {
-    const q = query(
-      collection(db, 'friendRequests'),
-      where('to', '==', uid),
-      where('status', '==', 'pending')
-    );
+    const q = query(collection(db, 'friendRequests'), where('to', '==', uid), where('status', '==', 'pending'));
     const snap = await getDocs(q);
     return snap.docs.map(d => d.data());
   },
 
   async getSentRequests(uid) {
-    const q = query(
-      collection(db, 'friendRequests'),
-      where('from', '==', uid),
-      where('status', '==', 'pending')
-    );
+    const q = query(collection(db, 'friendRequests'), where('from', '==', uid), where('status', '==', 'pending'));
     const snap = await getDocs(q);
     return snap.docs.map(d => d.data());
   },
 
   async searchUsers(term) {
-    const q = query(
-      collection(db, 'users'),
-      where('displayName', '>=', term),
-      where('displayName', '<=', term + '\uf8ff'),
-      limit(10)
-    );
+    const q = query(collection(db, 'users'), where('displayName', '>=', term), where('displayName', '<=', term + '\uf8ff'), limit(10));
     const snap = await getDocs(q);
     return snap.docs.map(d => d.data());
   },
 
   async addNotification(uid, data) {
-    if (!uid || uid.startsWith('guest_')) {
-      return;
-    }
+    if (!uid || uid.startsWith('guest_')) return;
     const ref = doc(collection(db, 'users', uid, 'notifications'));
     data.read = false;
     data.createdAt = serverTimestamp();
     await setDoc(ref, data);
   },
 
-  async getNotifications(uid, count) {
-    if (!count) {
-      count = 20;
-    }
-    if (!uid || uid.startsWith('guest_')) {
-      return [];
-    }
-    const q = query(
-      collection(db, 'users', uid, 'notifications'),
-      orderBy('createdAt', 'desc'),
-      limit(count)
-    );
+  async getNotifications(uid, count = 20) {
+    if (!uid || uid.startsWith('guest_')) return [];
+    const q = query(collection(db, 'users', uid, 'notifications'), orderBy('createdAt', 'desc'), limit(count));
     const snap = await getDocs(q);
-    return snap.docs.map(d => {
-      const data = d.data();
-      data.id = d.id;
-      return data;
-    });
+    return snap.docs.map(d => { const d2 = d.data(); d2.id = d.id; return d2; });
   },
 
   async markNotificationRead(uid, notifId) {
@@ -244,36 +168,18 @@ export const DB = {
   },
 
   listenNotifications(uid, callback) {
-    if (!uid || uid.startsWith('guest_')) {
-      return () => {};
-    }
-    const q = query(
-      collection(db, 'users', uid, 'notifications'),
-      orderBy('createdAt', 'desc'),
-      limit(20)
-    );
+    if (!uid || uid.startsWith('guest_')) return () => {};
+    const q = query(collection(db, 'users', uid, 'notifications'), orderBy('createdAt', 'desc'), limit(20));
     return onSnapshot(q, snap => {
-      const notifs = snap.docs.map(d => {
-        const data = d.data();
-        data.id = d.id;
-        return data;
-      });
-      callback(notifs);
+      callback(snap.docs.map(d => { const d2 = d.data(); d2.id = d.id; return d2; }));
     });
   },
 
   async getLiveRoomCount() {
-    const q = query(
-      collection(db, 'rooms'),
-      where('phase', 'in', ['lobby', 'prompting', 'guessing']),
-      limit(100)
-    );
     try {
-      const snap = await getDocs(q);
-      return snap.size;
-    } catch (e) {
-      return 0;
-    }
+      const q = query(collection(db, 'rooms'), where('phase', 'in', ['lobby', 'prompting', 'guessing']), limit(100));
+      return (await getDocs(q)).size;
+    } catch { return 0; }
   },
 };
 

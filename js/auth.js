@@ -20,10 +20,7 @@ const AVATARS = ['🐸','🦊','🐙','🦋','🦁','🐼','🐨','🦄','🦀',
 export let currentUser = null;
 export let userProfile = null;
 
-async function ensureProfile(firebaseUser, overrides) {
-  if (!overrides) {
-    overrides = {};
-  }
+async function ensureProfile(firebaseUser, overrides = {}) {
   const ref = doc(db, 'users', firebaseUser.uid);
   const snap = await getDoc(ref);
 
@@ -33,24 +30,19 @@ async function ensureProfile(firebaseUser, overrides) {
       uid: firebaseUser.uid,
       displayName: overrides.displayName || firebaseUser.displayName || 'Player',
       email: firebaseUser.email || '',
-      avatar: avatar,
+      avatar,
       totalPoints: 0,
       gamesPlayed: 0,
       correctGuesses: 0,
       weeklyPoints: 0,
       weekStart: weekStart(),
       friends: [],
+      writingFingerprint: null, // AI-generated style profile
       createdAt: serverTimestamp(),
     };
-
-    if (overrides.displayName) {
-      profile.displayName = overrides.displayName;
-    }
-
     await setDoc(ref, profile);
     return profile;
   }
-
   return snap.data();
 }
 
@@ -65,7 +57,7 @@ onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
     userProfile = await ensureProfile(user);
-    window.dispatchEvent(new CustomEvent('user-ready', { detail: { user: user, profile: userProfile } }));
+    window.dispatchEvent(new CustomEvent('user-ready', { detail: { user, profile: userProfile } }));
   } else {
     currentUser = null;
     userProfile = null;
@@ -74,103 +66,66 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 export const Auth = {
-
   async register() {
     const name = document.getElementById('reg-name').value.trim();
     const email = document.getElementById('reg-email').value.trim();
     const pass = document.getElementById('reg-password').value;
-
-    if (!name) {
-      return window.UI?.toast('Enter your display name', 'bad');
-    }
-    if (!email) {
-      return window.UI?.toast('Enter your email', 'bad');
-    }
-    if (pass.length < 6) {
-      return window.UI?.toast('Password must be at least 6 characters', 'bad');
-    }
-
+    if (!name) return window.UI?.toast('Enter your display name', 'bad');
+    if (!email) return window.UI?.toast('Enter your email', 'bad');
+    if (pass.length < 6) return window.UI?.toast('Password must be at least 6 characters', 'bad');
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       await updateProfile(cred.user, { displayName: name });
       await ensureProfile(cred.user, { displayName: name });
-    } catch (e) {
-      window.UI?.toast(friendlyError(e), 'bad');
-    }
+    } catch (e) { window.UI?.toast(friendlyError(e), 'bad'); }
   },
 
   async login() {
     const email = document.getElementById('login-email').value.trim();
     const pass = document.getElementById('login-password').value;
-
-    if (!email || !pass) {
-      return window.UI?.toast('Fill in email and password', 'bad');
-    }
-
+    if (!email || !pass) return window.UI?.toast('Fill in email and password', 'bad');
     try {
       await signInWithEmailAndPassword(auth, email, pass);
-    } catch (e) {
-      window.UI?.toast(friendlyError(e), 'bad');
-    }
+    } catch (e) { window.UI?.toast(friendlyError(e), 'bad'); }
   },
 
   async loginGoogle() {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-    } catch (e) {
-      window.UI?.toast(friendlyError(e), 'bad');
-    }
+    } catch (e) { window.UI?.toast(friendlyError(e), 'bad'); }
   },
 
   async guestLogin() {
     const name = document.getElementById('guest-name').value.trim();
-
-    if (!name) {
-      return window.UI?.toast('Enter a display name', 'bad');
-    }
-
+    if (!name) return window.UI?.toast('Enter a display name', 'bad');
     const guestId = 'guest_' + Date.now();
     currentUser = { uid: guestId, displayName: name, isGuest: true };
     userProfile = {
       uid: guestId,
       displayName: name,
       avatar: AVATARS[Math.floor(Math.random() * AVATARS.length)],
-      totalPoints: 0,
-      gamesPlayed: 0,
-      correctGuesses: 0,
-      isGuest: true,
+      totalPoints: 0, gamesPlayed: 0, correctGuesses: 0, isGuest: true,
     };
-
     window.dispatchEvent(new CustomEvent('user-ready', { detail: { user: currentUser, profile: userProfile } }));
   },
 
   async logout() {
-    if (currentUser && currentUser.isGuest) {
-      currentUser = null;
-      userProfile = null;
+    if (currentUser?.isGuest) {
+      currentUser = null; userProfile = null;
       window.dispatchEvent(new CustomEvent('user-signed-out'));
       return;
     }
     await signOut(auth);
   },
 
-  getCurrentUser() {
-    return currentUser;
-  },
-
-  getProfile() {
-    return userProfile;
-  },
+  getCurrentUser() { return currentUser; },
+  getProfile() { return userProfile; },
 
   async refreshProfile() {
-    if (!currentUser || currentUser.isGuest) {
-      return;
-    }
+    if (!currentUser || currentUser.isGuest) return;
     const snap = await getDoc(doc(db, 'users', currentUser.uid));
-    if (snap.exists()) {
-      userProfile = snap.data();
-    }
+    if (snap.exists()) userProfile = snap.data();
     return userProfile;
   },
 };

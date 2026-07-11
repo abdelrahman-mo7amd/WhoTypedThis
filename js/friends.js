@@ -92,19 +92,28 @@ export const Friends = {
   },
 
   async acceptRequest(fromUid) {
+    console.log('[accept] clicked, fromUid:', fromUid);
     const uid = Auth.getCurrentUser()?.uid;
+    console.log('[accept] current user uid:', uid);
     if (!uid) {
+      console.log('[accept] no uid, aborting');
       return;
     }
     try {
+      console.log('[accept] calling DB.acceptFriendRequest...');
       await DB.acceptFriendRequest(fromUid, uid);
+      console.log('[accept] DB call done, refreshing profile...');
       await Auth.refreshProfile();
-      window.UI?.toast('Friend added! 🤝', 'good');
+      console.log('[accept] all done');
+      window.UI?.toast('Friend added', 'good');
       window.Audio?.correct();
       Friends.showTab('friends');
       window.Notifications?.reload();
     } catch (e) {
-      window.UI?.toast('Failed to accept', 'bad');
+      console.error('[accept] FAILED:', e);
+      console.error('[accept] code:', e?.code);
+      console.error('[accept] message:', e?.message);
+      window.UI?.toast('Failed: ' + (e?.code || e?.message || 'unknown'), 'bad');
     }
   },
 
